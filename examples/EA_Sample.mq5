@@ -1,44 +1,62 @@
 //+------------------------------------------------------------------+
 //| Project: Quant-Pie MQL5                                          |
 //| File:    EA_Sample.mq5                                           |
-//| Purpose: Example EA using Quant-Pie Core                         |
+//| Purpose: Sample EA based on EA_Template and Component System    |
 //|                                                                  |
 //| (c) 2024 FullValue.AI - All rights reserved                      |
 //+------------------------------------------------------------------+
 #property strict
 
-#include "..\\core\\OrderManager.mqh"
-#include "..\\core\\RiskManager.mqh"
-#include "..\\core\\PositionManager.mqh"
-#include "..\\core\\SessionManager.mqh"
+#include <QuantPie/Templates/EA_Template.mqh>
+#include <QuantPie/core/StrategyBase.mqh>
+#include <QuantPie/core/SignalManager.mqh>
+#include <QuantPie/core/LoggerManager.mqh>
+#include <QuantPie/core/LotManager.mqh>
 
-// Create instances
-OrderManager    orderManager(123456);
-RiskManager     riskManager(1.0, 5, 10.0);
-PositionManager positionManager(100, 200, 100, 50);
-SessionManager  sessionManager(9, 0, 17, 0); // 09:00 às 17:00
+// Declare strategy instance
+StrategyBase* strategy = NULL;
 
-int OnInit()
+// Define a simple strategy
+class SampleStrategy : public StrategyBase
 {
-    Print("EA Sample Started!");
-    return INIT_SUCCEEDED;
-}
+private:
+    SignalManager* m_signalManager;
 
-void OnTick()
-{
-    // Check if within allowed session
-    if(!sessionManager.IsWithinSession())
-        return;
+public:
+    SampleStrategy()
+    {
+        m_signalManager = new SignalManager(10, 50, MODE_SMA);
+    }
 
-    // Check if allowed to open new trade
-    if(!riskManager.CanOpenNewTrade())
-        return;
+    ~SampleStrategy()
+    {
+        if (m_signalManager != NULL)
+            delete m_signalManager;
+    }
 
-    // Open simple Buy
-    orderManager.OpenBuy(0.1);
+    void OnInit() override
+    {
+        LoggerManager::Log("Sample Strategy Initialized.", LOG_INFO);
+    }
 
-    // Apply BreakEven and TrailingStop to existing positions
-    ulong ticket = 0; // In real case, you would loop over open positions and get ticket
-    positionManager.ApplyBreakEven(ticket);
-    positionManager.ApplyTrailingStop(ticket);
-}
+    void OnTick() override
+    {
+        SignalType signal = m_signalManager.GetSignal();
+
+        if (signal == SIGNAL_BUY)
+        {
+            LoggerManager::Log("SignalManager generated BUY signal.", LOG_INFO);
+        }
+        else if (signal == SIGNAL_SELL)
+        {
+            LoggerManager::Log("SignalManager generated SELL signal.", LOG_INFO);
+        }
+    }
+
+    void OnTrade() override {}
+
+    SignalType GetSignal() override
+    {
+        return m_signalManager.GetSignal();
+    }
+};
