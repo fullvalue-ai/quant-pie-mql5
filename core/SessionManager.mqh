@@ -1,41 +1,56 @@
 //+------------------------------------------------------------------+
 //| Project: Quant-Pie MQL5                                          |
 //| File:    SessionManager.mqh                                      |
-//| Purpose: Manage trading sessions (allowed trading hours)        |
+//| Purpose: Manage allowed trading sessions as a Component         |
 //|                                                                  |
 //| (c) 2024 FullValue.AI - All rights reserved                      |
 //+------------------------------------------------------------------+
 #property strict
 
-class SessionManager
+#include "IComponent.mqh"
+
+class SessionManager : public IComponent
 {
-    private:
-        int m_sessionStartHour;
-        int m_sessionStartMinute;
-        int m_sessionEndHour;
-        int m_sessionEndMinute;
+private:
+    int m_startHour;
+    int m_startMinute;
+    int m_endHour;
+    int m_endMinute;
 
-    public:
-        SessionManager(int startHour = 0, int startMinute = 0, int endHour = 23, int endMinute = 59)
-        {
-            m_sessionStartHour   = startHour;
-            m_sessionStartMinute = startMinute;
-            m_sessionEndHour     = endHour;
-            m_sessionEndMinute   = endMinute;
-        }
+public:
+    SessionManager(int startHour = 0, int startMinute = 0, int endHour = 23, int endMinute = 59)
+    {
+        m_startHour = startHour;
+        m_startMinute = startMinute;
+        m_endHour = endHour;
+        m_endMinute = endMinute;
+    }
 
-    bool IsWithinSession();
+    // Component Methods
+    void OnInit() override
+    {
+        // Nothing special for initialization yet
+    }
 
-    void SetSession(int startHour, int startMinute, int endHour, int endMinute)
-        {
-        m_sessionStartHour   = startHour;
-        m_sessionStartMinute = startMinute;
-        m_sessionEndHour     = endHour;
-        m_sessionEndMinute   = endMinute;
-        }
+    void OnTick() override
+    {
+        // Nothing needed per tick (optional future enhancements)
+    }
 
-    int GetSessionStartHour() const { return m_sessionStartHour; }
-    int GetSessionStartMinute() const { return m_sessionStartMinute; }
-    int GetSessionEndHour() const { return m_sessionEndHour; }
-    int GetSessionEndMinute() const { return m_sessionEndMinute; }
+    void OnTrade() override
+    {
+        // Nothing needed per trade
+    }
+
+    bool IsWithinSession()
+    {
+        MqlDateTime timeStruct;
+        TimeToStruct(TimeCurrent(), timeStruct);
+
+        int currentMinutes = timeStruct.hour * 60 + timeStruct.min;
+        int startMinutes = m_startHour * 60 + m_startMinute;
+        int endMinutes = m_endHour * 60 + m_endMinute;
+
+        return (currentMinutes >= startMinutes && currentMinutes <= endMinutes);
+    }
 };
