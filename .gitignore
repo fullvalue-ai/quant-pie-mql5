@@ -1,3 +1,4 @@
 # Ignore compiled files
 *.ex5
 *.ex4
+sync_config.env

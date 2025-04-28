@@ -17,4 +17,5 @@ public:
     virtual void OnInit() = 0;
     virtual void OnTick() = 0;
     virtual void OnTrade() = 0;
+    virtual void OnDeinit() = 0;
 };

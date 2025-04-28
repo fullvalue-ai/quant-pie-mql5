@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property strict
 
-#include "IComponent.mqh"
+#include <QuantPie/core/components/IComponent.mqh>
 
 class SessionManager : public IComponent
 {
@@ -28,19 +28,16 @@ public:
 
     // Component Methods
     void OnInit() override
-    {
-        // Nothing special for initialization yet
-    }
+    {}
 
     void OnTick() override
-    {
-        // Nothing needed per tick (optional future enhancements)
-    }
+    {}
 
     void OnTrade() override
-    {
-        // Nothing needed per trade
-    }
+    {}
+
+    void OnDeinit() override
+    {}
 
     bool IsWithinSession()
     {

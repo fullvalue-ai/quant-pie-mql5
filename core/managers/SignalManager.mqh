@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property strict
 
-#include "IComponent.mqh"
+#include <QuantPie/core/components/IComponent.mqh>
 #include "StrategyBase.mqh"
 
 class SignalManager : public IComponent
@@ -32,6 +32,7 @@ public:
     void OnInit() override {}
     void OnTick() override {}
     void OnTrade() override {}
+    void OnDeinit() override {}
 
     SignalType GetSignal()
     {

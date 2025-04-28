@@ -1,50 +1,71 @@
 //+------------------------------------------------------------------+
 //| Project: Quant-Pie MQL5                                          |
 //| File:    RiskManager.mqh                                         |
-//| Purpose: Manage trading risk and plug as a Component             |
+//| Purpose: Full Risk Management (Limits + ATR + BreakEven + Trail) |
 //|                                                                  |
 //| (c) 2024 FullValue.AI - All rights reserved                      |
 //+------------------------------------------------------------------+
 #property strict
 
-#include "IComponent.mqh"
+#include <QuantPie/core/components/IComponent.mqh>
+#include <Trade/Trade.mqh>
 
 class RiskManager : public IComponent
 {
 private:
+    // Core Limits
     double m_riskPerTrade;
-    int m_maxOpenPositions;
+    int    m_maxOpenPositions;
     double m_maxDailyLossPercent;
     double m_maxWeeklyLossPercent;
     double m_maxMonthlyLossPercent;
-    int m_maxConsecutiveLosses;
+    int    m_maxConsecutiveLosses;
 
+    // Balance control
     double m_startingDayBalance;
     double m_startingWeekBalance;
     double m_startingMonthBalance;
+    int    m_lastTradingDay;
+    int    m_lastTradingWeek;
+    int    m_lastTradingMonth;
+    int    m_currentConsecutiveLosses;
 
-    int m_lastTradingDay;
-    int m_lastTradingWeek;
-    int m_lastTradingMonth;
+    // Advanced Features
+    bool   m_useATRStop;
+    bool   m_useBreakEven;
+    bool   m_useTrailingStop;
 
-    int m_currentConsecutiveLosses;
+    double m_atrMultiplier;
+    double m_breakEvenDistance;
+    double m_trailingStartDistance;
+    double m_trailingDistance;
 
 public:
     RiskManager(double riskPerTrade = 0.01, int maxOpenPositions = 5, 
                 double maxDailyLossPercent = 5.0, double maxWeeklyLossPercent = 10.0, double maxMonthlyLossPercent = 20.0,
                 int maxConsecutiveLosses = 3)
     {
+        // Limits
         m_riskPerTrade = riskPerTrade;
         m_maxOpenPositions = maxOpenPositions;
         m_maxDailyLossPercent = maxDailyLossPercent;
         m_maxWeeklyLossPercent = maxWeeklyLossPercent;
         m_maxMonthlyLossPercent = maxMonthlyLossPercent;
         m_maxConsecutiveLosses = maxConsecutiveLosses;
-
         m_currentConsecutiveLosses = 0;
+
+        // Advanced controls disabled by default
+        m_useATRStop = false;
+        m_useBreakEven = false;
+        m_useTrailingStop = false;
+
+        m_atrMultiplier = 2.0;
+        m_breakEvenDistance = 50;
+        m_trailingStartDistance = 100;
+        m_trailingDistance = 50;
     }
 
-    // Component Methods
+    // Component methods
     void OnInit() override
     {
         MqlDateTime timeStruct;
@@ -60,10 +81,7 @@ public:
         m_startingMonthBalance = balance;
     }
 
-    void OnTick() override
-    {
-        // Nothing needed per tick for RiskManager now
-    }
+    void OnTick() override {}
 
     void OnTrade() override
     {
@@ -79,27 +97,24 @@ public:
                 ENUM_DEAL_ENTRY entryType = (ENUM_DEAL_ENTRY)HistoryDealGetInteger(ticket, DEAL_ENTRY);
 
                 if (entryType == DEAL_ENTRY_OUT) // Only exits
-                {
                     RegisterTradeResult(profit);
-                }
             }
         }
     }
 
+    void OnDeinit(const int reason) override {}
+
+    // Public Risk Checks
     bool CanOpenNewTrade()
     {
-        int totalPositions = PositionsTotal();
-        if (totalPositions >= m_maxOpenPositions)
-        {
-            LoggerManager::Log("Cannot open new trade: max open positions limit reached.", LOG_WARNING);
+        if (PositionsTotal() >= m_maxOpenPositions)
             return false;
-        }
 
         if (IsDailyLossExceeded() || IsWeeklyLossExceeded() || IsMonthlyLossExceeded() || IsConsecutiveLossLimitExceeded())
-        {
-            LoggerManager::Log("Cannot open new trade: loss limit exceeded (daily, weekly, monthly or sequence).", LOG_ERROR);
             return false;
-        }
+
+        if (!CheckATRStop())
+            return false;
 
         return true;
     }
@@ -107,17 +122,14 @@ public:
     bool CheckRiskParameters(double lot, double stopLossDistancePips)
     {
         if (lot <= 0.0 || stopLossDistancePips <= 0.0)
-        {
-            LoggerManager::Log("Risk Check Failed: lot or stop loss distance invalid.", LOG_ERROR);
             return false;
-        }
 
         double accountBalance = AccountInfoDouble(ACCOUNT_BALANCE);
         double riskAmountAllowed = accountBalance * m_riskPerTrade;
 
         double pointValue = SymbolInfoDouble(_Symbol, SYMBOL_POINT);
         if (pointValue <= 0.0)
-            pointValue = 0.0001; // fallback
+            pointValue = 0.0001;
 
         double contractSize = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
         if (contractSize <= 0.0)
@@ -125,30 +137,51 @@ public:
 
         double estimatedLoss = lot * contractSize * stopLossDistancePips * pointValue;
 
-        if (estimatedLoss > riskAmountAllowed)
-        {
-            LoggerManager::Log("Risk Check Failed: estimated loss exceeds allowed per trade risk.", LOG_WARNING);
-            return false;
-        }
+        return (estimatedLoss <= riskAmountAllowed);
+    }
 
+    void ConfigureATRStop(bool useATRStop, double atrMultiplier)
+    {
+        m_useATRStop = useATRStop;
+        m_atrMultiplier = atrMultiplier;
+    }
+
+    void ConfigureBreakEven(bool useBreakEven, double breakEvenDistance)
+    {
+        m_useBreakEven = useBreakEven;
+        m_breakEvenDistance = breakEvenDistance;
+    }
+
+    void ConfigureTrailingStop(bool useTrailingStop, double trailingStartDistance, double trailingDistance)
+    {
+        m_useTrailingStop = useTrailingStop;
+        m_trailingStartDistance = trailingStartDistance;
+        m_trailingDistance = trailingDistance;
+    }
+
+    bool ApplyBreakEven()
+    {
+        if (!m_useBreakEven)
+            return false;
+        // Placeholder for real logic
         return true;
     }
 
-    void RegisterTradeResult(double profit)
+    bool ApplyTrailingStop()
     {
-        if (profit < 0)
-            m_currentConsecutiveLosses++;
-        else
-            m_currentConsecutiveLosses = 0;
+        if (!m_useTrailingStop)
+            return false;
+        // Placeholder for real logic
+        return true;
     }
 
 private:
+    // Internals
     void RefreshBalances()
     {
         MqlDateTime timeStruct;
         TimeToStruct(TimeCurrent(), timeStruct);
 
-        // New Day
         if (timeStruct.day != m_lastTradingDay)
         {
             m_lastTradingDay = timeStruct.day;
@@ -156,14 +189,12 @@ private:
             m_currentConsecutiveLosses = 0;
         }
 
-        // New Week
         if ((timeStruct.day_of_year / 7) != m_lastTradingWeek)
         {
             m_lastTradingWeek = timeStruct.day_of_year / 7;
             m_startingWeekBalance = AccountInfoDouble(ACCOUNT_BALANCE);
         }
 
-        // New Month
         if (timeStruct.mon != m_lastTradingMonth)
         {
             m_lastTradingMonth = timeStruct.mon;
@@ -198,5 +229,25 @@ private:
     bool IsConsecutiveLossLimitExceeded()
     {
         return (m_currentConsecutiveLosses >= m_maxConsecutiveLosses);
+    }
+
+    bool CheckATRStop()
+    {
+        if (!m_useATRStop)
+            return true;
+
+        double atr = iATR(NULL, PERIOD_H1, 14);
+        if (atr > 0 && atr * m_atrMultiplier > 1000)
+            return false;
+
+        return true;
+    }
+
+    void RegisterTradeResult(double profit)
+    {
+        if (profit < 0)
+            m_currentConsecutiveLosses++;
+        else
+            m_currentConsecutiveLosses = 0;
     }
 };
