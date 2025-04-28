@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property strict
 
-#include "IComponent.mqh"
+#include <QuantPie/core/components/IComponent.mqh>
 
 // Signal Types for strategies
 enum SignalType
@@ -24,20 +24,13 @@ public:
     virtual ~StrategyBase() {}
 
     // Component Methods
-    void OnInit() override
-    {
-        // Base initialization logic if needed
-    }
+    void OnInit() override {}
 
-    void OnTick() override
-    {
-        // Base tick logic if needed
-    }
+    void OnTick() override {}
 
-    void OnTrade() override
-    {
-        // Base trade event logic if needed
-    }
+    void OnTrade() override {}
+
+    void OnDeinit() override {}
 
     // Mandatory function for all strategies
     virtual SignalType GetSignal() = 0;

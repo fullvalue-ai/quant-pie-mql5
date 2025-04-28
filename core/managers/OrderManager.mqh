@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property strict
 
-#include "IComponent.mqh"
+#include <QuantPie/core/components/IComponent.mqh>
 
 class OrderManager : public IComponent
 {
@@ -24,19 +24,16 @@ public:
 
     // Component Methods
     void OnInit() override
-    {
-        // Nothing needed at initialization
-    }
+    {}
 
     void OnTick() override
-    {
-        // Nothing needed per tick
-    }
+    {}
 
     void OnTrade() override
-    {
-        // Nothing needed per trade
-    }
+    {}
+
+    void OnDeinit() override
+    {}
 
     bool OpenBuy(double lot, double price = 0.0, double sl = 0.0, double tp = 0.0)
     {

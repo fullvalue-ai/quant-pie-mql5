@@ -7,7 +7,7 @@
 //+------------------------------------------------------------------+
 #property strict
 
-#include "IComponent.mqh"
+#include <QuantPie/core/components/IComponent.mqh>
 
 // Log levels
 enum LogLevel
@@ -22,19 +22,16 @@ class LoggerManager : public IComponent
 public:
     // Component Methods
     void OnInit() override
-    {
-        // Nothing to initialize for logging (yet)
-    }
+    {}
 
     void OnTick() override
-    {
-        // Nothing to do every tick
-    }
+    {}
 
     void OnTrade() override
-    {
-        // Nothing to do every trade by default
-    }
+    {}
+
+    void OnDeinit() override
+    {}
 
     // Main Logger Method
     static void Log(string message, LogLevel level = LOG_INFO)
