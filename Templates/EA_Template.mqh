@@ -1,64 +1,71 @@
 //+------------------------------------------------------------------+
 //| Project: Quant-Pie MQL5                                          |
-//| File:    EA_Template.mq5                                         |
-//| Purpose: Base EA Template using full Component architecture     |
+//| File:    EA_Template.mqh                                         |
+//| Purpose: Generic EA wrapper for any StrategyBase-derived class   |
 //|                                                                  |
 //| (c) 2024 FullValue.AI - All rights reserved                      |
 //+------------------------------------------------------------------+
 #property strict
 
-#include <QuantPie/core/IComponent.mqh>
-#include <QuantPie/core/StrategyBase.mqh>
-#include <QuantPie/core/RiskManager.mqh>
-#include <QuantPie/core/LoggerManager.mqh>
-#include <QuantPie/core/LotManager.mqh>
-#include <QuantPie/core/OrderManager.mqh>
-#include <QuantPie/core/SessionManager.mqh>
-#include <QuantPie/core/SignalManager.mqh>
+#include <QuantPie/core/systems/StrategyBase.mqh>
+#include <QuantPie/core/components/IComponent.mqh>
+#include <QuantPie/core/components/LoggerComponent.mqh>
+#include <QuantPie/core/components/RiskComponent.mqh>
+#include <QuantPie/core/components/LotComponent.mqh>
+#include <QuantPie/core/components/OrderComponent.mqh>
+#include <QuantPie/core/components/SessionComponent.mqh>
+#include <QuantPie/core/components/SignalComponent.mqh>
 
-// Global pointers
+// External strategy instance (to be defined in the EA .mq5)
 extern StrategyBase* strategy;
-IComponent* components[];
-int componentsTotal = 0;
 
-// Manager instances
-RiskManager* riskManager;
-LoggerManager* loggerManager;
-LotManager* lotManager;
-OrderManager* orderManager;
-SessionManager* sessionManager;
-SignalManager* signalManager;
+// Array of core components for lifecycle management
+IComponent* components[];
+int         componentsTotal = 0;
+
+// Core component pointers
+LoggerComponent*   loggerComponent;
+RiskComponent*     riskComponent;
+LotComponent*      lotComponent;
+OrderComponent*    orderComponent;
+SessionComponent*  sessionComponent;
+SignalComponent*   signalComponent;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit()
 {
-    riskManager = new RiskManager(0.01, 5, 5.0, 10.0, 20.0, 3);
-    loggerManager = new LoggerManager();
-    lotManager = new LotManager(0.01);
-    orderManager = new OrderManager(123456, 5);
-    sessionManager = new SessionManager(0, 0, 23, 59);
-    signalManager = new SignalManager(10, 50, MODE_SMA);
+    // Instantiate core components
+    loggerComponent  = new LoggerComponent();
+    riskComponent    = new RiskComponent(0.01);
+    lotComponent     = new LotComponent(0.01);
+    orderComponent   = new OrderComponent(123456);
+    sessionComponent = new SessionComponent(0, 0, 23, 59);
+    signalComponent  = new SignalComponent(10, 50, MODE_SMA);
 
-    ArrayResize(components, 5);
-    components[0] = riskManager;
-    components[1] = loggerManager;
-    components[2] = lotManager;
-    components[3] = orderManager;
-    components[4] = sessionManager;
+    // Setup lifecycle array
+    ArrayResize(components, 6);
+    components[0] = loggerComponent;
+    components[1] = riskComponent;
+    components[2] = lotComponent;
+    components[3] = orderComponent;
+    components[4] = sessionComponent;
+    components[5] = signalComponent;
     componentsTotal = ArraySize(components);
 
-    for (int i = 0; i < componentsTotal; i++)
-        components[i].OnInit();
+    // Initialize all components
+    for(int i = 0; i < componentsTotal; i++)
+        components[i]->OnInit();
 
-    if (strategy != NULL)
-        strategy.OnInit();
+    // Initialize strategy if provided
+    if(strategy != NULL)
+        strategy->OnInit();
     else
-        LoggerManager::Log("Warning: No strategy instance created.", LOG_WARNING);
+        Print("Warning: No strategy instance created.");
 
-    LoggerManager::Log("EA Template Initialized Successfully.", LOG_INFO);
-    return INIT_SUCCEEDED;
+    loggerComponent->Log("EA Template Initialized Successfully.", LOG_INFO);
+    return(INIT_SUCCEEDED);
 }
 
 //+------------------------------------------------------------------+
@@ -66,11 +73,11 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnTick()
 {
-    if (strategy != NULL)
-        strategy.OnTick();
+    if(strategy != NULL)
+        strategy->OnTick();
 
-    for (int i = 0; i < componentsTotal; i++)
-        components[i].OnTick();
+    for(int i = 0; i < componentsTotal; i++)
+        components[i]->OnTick();
 }
 
 //+------------------------------------------------------------------+
@@ -78,11 +85,11 @@ void OnTick()
 //+------------------------------------------------------------------+
 void OnTrade()
 {
-    if (strategy != NULL)
-        strategy.OnTrade();
+    if(strategy != NULL)
+        strategy->OnTrade();
 
-    for (int i = 0; i < componentsTotal; i++)
-        components[i].OnTrade();
+    for(int i = 0; i < componentsTotal; i++)
+        components[i]->OnTrade();
 }
 
 //+------------------------------------------------------------------+
@@ -90,13 +97,11 @@ void OnTrade()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
 {
-    delete riskManager;
-    delete loggerManager;
-    delete lotManager;
-    delete orderManager;
-    delete sessionManager;
-    delete signalManager;
+    // Cleanup components
+    for(int i = 0; i < componentsTotal; i++)
+        delete components[i];
 
-    if (strategy != NULL)
+    // Cleanup strategy if allocated
+    if(strategy != NULL)
         delete strategy;
 }

@@ -10,12 +10,11 @@
 class IComponent
 {
 public:
-    // Destructor virtual para herança segura
-    virtual ~IComponent() {}
-
-    // Methods every Component must implement
     virtual void OnInit() = 0;
     virtual void OnTick() = 0;
     virtual void OnTrade() = 0;
     virtual void OnDeinit() = 0;
+    // destrutor virtual por segurança
+    virtual ~IComponent() {}
 };
+

@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //| Project: Quant-Pie MQL5                                          |
-//| File:    SessionManager.mqh                                      |
+//| File:    SessionComponent.mqh                                      |
 //| Purpose: Manage allowed trading sessions as a Component         |
 //|                                                                  |
 //| (c) 2024 FullValue.AI - All rights reserved                      |
@@ -9,7 +9,7 @@
 
 #include <QuantPie/core/components/IComponent.mqh>
 
-class SessionManager : public IComponent
+class SessionComponent : public IComponent
 {
 private:
     int m_startHour;
@@ -18,7 +18,7 @@ private:
     int m_endMinute;
 
 public:
-    SessionManager(int startHour = 0, int startMinute = 0, int endHour = 23, int endMinute = 59)
+    SessionComponent(int startHour = 0, int startMinute = 0, int endHour = 23, int endMinute = 59)
     {
         m_startHour = startHour;
         m_startMinute = startMinute;
@@ -27,17 +27,13 @@ public:
     }
 
     // Component Methods
-    void OnInit() override
-    {}
+    void OnInit() {}
 
-    void OnTick() override
-    {}
+    void OnTick() {}
 
-    void OnTrade() override
-    {}
+    void OnTrade() {}
 
-    void OnDeinit() override
-    {}
+    void OnDeinit() {}
 
     bool IsWithinSession()
     {

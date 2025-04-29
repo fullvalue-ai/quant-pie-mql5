@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //| Project: Quant-Pie MQL5                                          |
-//| File:    RiskManager.mqh                                         |
+//| File:    RiskComponent.mqh                                         |
 //| Purpose: Full Risk Management (Limits + ATR + BreakEven + Trail) |
 //|                                                                  |
 //| (c) 2024 FullValue.AI - All rights reserved                      |
@@ -10,7 +10,7 @@
 #include <QuantPie/core/components/IComponent.mqh>
 #include <Trade/Trade.mqh>
 
-class RiskManager : public IComponent
+class RiskComponent : public IComponent
 {
 private:
     // Core Limits
@@ -41,7 +41,7 @@ private:
     double m_trailingDistance;
 
 public:
-    RiskManager(double riskPerTrade = 0.01, int maxOpenPositions = 5, 
+    RiskComponent(double riskPerTrade = 0.01, int maxOpenPositions = 5, 
                 double maxDailyLossPercent = 5.0, double maxWeeklyLossPercent = 10.0, double maxMonthlyLossPercent = 20.0,
                 int maxConsecutiveLosses = 3)
     {
@@ -66,7 +66,7 @@ public:
     }
 
     // Component methods
-    void OnInit() override
+    void OnInit()
     {
         MqlDateTime timeStruct;
         TimeToStruct(TimeCurrent(), timeStruct);
@@ -81,9 +81,9 @@ public:
         m_startingMonthBalance = balance;
     }
 
-    void OnTick() override {}
+    void OnTick() {}
 
-    void OnTrade() override
+    void OnTrade() 
     {
         HistorySelect(TimeCurrent() - 3600, TimeCurrent());
         uint deals = HistoryDealsTotal();
@@ -102,7 +102,7 @@ public:
         }
     }
 
-    void OnDeinit(const int reason) override {}
+    void OnDeinit() {}
 
     // Public Risk Checks
     bool CanOpenNewTrade()

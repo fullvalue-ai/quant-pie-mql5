@@ -1,24 +1,24 @@
 //+------------------------------------------------------------------+
 //| Project: Quant-Pie MQL5                                          |
-//| File:    PositionSizeCalculator.mqh                              |
+//| File:    PositionSizeCalculatorHelper.mqh                              |
 //| Purpose: Professional Lot Size Calculator based on risk percent |
 //|                                                                  |
 //| (c) 2024 FullValue.AI - All rights reserved                      |
 //+------------------------------------------------------------------+
 #property strict
 
-class PositionSizeCalculator
+class PositionSizeCalculatorHelper
 {
 private:
     double m_riskPercent;
 
 public:
     // Constructor
-    PositionSizeCalculator(double riskPercent = 0.01)
+    PositionSizeCalculatorHelper(double riskPercent = 0.01)
     {
         m_riskPercent = riskPercent;
     }
-
+    
     // Setters and Getters
     void SetRiskPercent(double riskPercent)
     {

@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //| Project: Quant-Pie MQL5                                          |
-//| File:    OrderManager.mqh                                        |
+//| File:    OrderComponent.mqh                                        |
 //| Purpose: Manage order operations as a Component                 |
 //|                                                                  |
 //| (c) 2024 FullValue.AI - All rights reserved                      |
@@ -9,31 +9,27 @@
 
 #include <QuantPie/core/components/IComponent.mqh>
 
-class OrderManager : public IComponent
+class OrderComponent : public IComponent
 {
 private:
     int m_magicNumber;
     double m_slippage;
 
 public:
-    OrderManager(int magicNumber = 0, double slippage = 5)
+    OrderComponent(int magicNumber = 0, double slippage = 5)
     {
         m_magicNumber = magicNumber;
         m_slippage = slippage;
     }
 
     // Component Methods
-    void OnInit() override
-    {}
+    void OnInit() {}
 
-    void OnTick() override
-    {}
+    void OnTick() {}
 
-    void OnTrade() override
-    {}
+    void OnTrade() {}
 
-    void OnDeinit() override
-    {}
+    void OnDeinit() {}
 
     bool OpenBuy(double lot, double price = 0.0, double sl = 0.0, double tp = 0.0)
     {
@@ -59,7 +55,7 @@ public:
 
         if (!OrderSend(request, result))
         {
-            LoggerManager::Log("Failed to open BUY order.", LOG_ERROR);
+            LoggerComponent::Log("Failed to open BUY order.", LOG_ERROR);
             return false;
         }
 
@@ -90,7 +86,7 @@ public:
 
         if (!OrderSend(request, result))
         {
-            LoggerManager::Log("Failed to open SELL order.", LOG_ERROR);
+            LoggerComponent::Log("Failed to open SELL order.", LOG_ERROR);
             return false;
         }
 
@@ -123,7 +119,7 @@ public:
 
         if (!OrderSend(request, result))
         {
-            LoggerManager::Log("Failed to close order.", LOG_ERROR);
+            LoggerComponent::Log("Failed to close order.", LOG_ERROR);
             return false;
         }
 
@@ -149,7 +145,7 @@ public:
 
         if (!OrderSend(request, result))
         {
-            LoggerManager::Log("Failed to modify order.", LOG_ERROR);
+            LoggerComponent::Log("Failed to modify order.", LOG_ERROR);
             return false;
         }
 

@@ -1,13 +1,15 @@
 //+------------------------------------------------------------------+
 //| Project: Quant-Pie MQL5                                          |
-//| File:    PositionManager.mqh                                     |
+//| File:    PositionComponent.mqh                                     |
 //| Purpose: Manage position protection (BreakEven, Trailing, Step)  |
 //|                                                                  |
 //| (c) 2024 FullValue.AI - All rights reserved                      |
 //+------------------------------------------------------------------+
 #property strict
 
-class PositionManager
+#include <QuantPie/core/components/IComponent.mqh>
+
+class PositionComponent : public IComponent
 {
 private:
     double m_breakEvenPips;
@@ -20,7 +22,7 @@ private:
     bool   m_enableStepStop;
 
 public:
-    PositionManager(double breakEvenPips = 0, bool enableBreakEven = false,
+    PositionComponent(double breakEvenPips = 0, bool enableBreakEven = false,
                     double trailingStopPips = 0, bool enableTrailingStop = false,
                     double stepPips = 0, bool enableStepStop = false)
     {
@@ -31,6 +33,15 @@ public:
         m_stepPips = stepPips;
         m_enableStepStop = enableStepStop;
     }
+
+    // Component Methods
+    void OnInit() {}
+
+    void OnTick() {}
+
+    void OnTrade() {}
+
+    void OnDeinit() {}
 
     void ApplyManagement()
     {

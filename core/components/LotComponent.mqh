@@ -1,42 +1,42 @@
 //+------------------------------------------------------------------+
 //| Project: Quant-Pie MQL5                                          |
-//| File:    LotManager.mqh                                          |
+//| File:    LotComponent.mqh                                          |
 //| Purpose: Manager for position sizing using risk-based method     |
 //|                                                                  |
 //| (c) 2024 FullValue.AI - All rights reserved                      |
 //+------------------------------------------------------------------+
 #property strict
 
-#include <QuantPie/core/PositionSizeCalculator.mqh>
+#include <QuantPie/core/helpers/PositionSizeCalculatorHelper.mqh>
 #include <QuantPie/core/components/IComponent.mqh>
 
-class LotManager : public IComponent
+class LotComponent : public IComponent
 {
 private:
-    PositionSizeCalculator* m_calculator;
+    PositionSizeCalculatorHelper* m_calculator;
 
 public:
     // Constructor
-    LotManager(double riskPercent = 0.01)
+    LotComponent(double riskPercent = 0.01)
     {
-        m_calculator = new PositionSizeCalculator(riskPercent);
+        m_calculator = new PositionSizeCalculatorHelper(riskPercent);
     }
 
     // Destructor
-    ~LotManager()
+    ~LotComponent()
     {
         if (m_calculator != NULL)
             delete m_calculator;
     }
 
     // Component lifecycle
-    void OnInit() override {}
+    void OnInit() {}
 
-    void OnTick() override {}
+    void OnTick() {}
 
-    void OnTrade() override {}
+    void OnTrade() {}
 
-    void OnDeinit(const int reason) override {}
+    void OnDeinit() { }
 
     // Calculate lot size
     double CalculateLot(double stopLossDistancePips = 50)
@@ -44,13 +44,13 @@ public:
         if (m_calculator == NULL)
             return 0.0;
 
-        return m_calculator->CalculateLot(stopLossDistancePips);
+        return m_calculator.CalculateLot(stopLossDistancePips);
     }
 
     // Adjust risk if needed
     void SetRiskPercent(double riskPercent)
     {
         if (m_calculator != NULL)
-            m_calculator->SetRiskPercent(riskPercent);
+            m_calculator.SetRiskPercent(riskPercent);
     }
 };

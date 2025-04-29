@@ -8,10 +8,10 @@ An open-source modular framework for building Expert Advisors (EAs) on MetaTrade
 
 ## 🚀 Features
 
-- **OrderManager**: Safely opens, closes, and modifies trading orders.
-- **RiskManager**: Manages exposure, maximum number of open positions, and financial risk limits.
-- **PositionManager**: Automatically handles BreakEven, Trailing Stop, Step Stop, and position closing.
-- **SessionManager**: Defines valid trading session windows (e.g., from 09:00 to 17:00 server time).
+- **OrderComponent**: Safely opens, closes, and modifies trading orders.
+- **RiskComponent**: Manages exposure, maximum number of open positions, and financial risk limits.
+- **PositionComponent**: Automatically handles BreakEven, Trailing Stop, Step Stop, and position closing.
+- **SessionComponent**: Defines valid trading session windows (e.g., from 09:00 to 17:00 server time).
 
 ---
 
@@ -45,7 +45,7 @@ New-Item -ItemType SymbolicLink -Path "C:\Users\<your_username>\AppData\Roaming\
 - The EA will open a **Buy** trade once:
   - It is within the allowed trading session.
   - No risk limits are violated.
-- The **PositionManager** will automatically manage BreakEven and Trailing Stop.
+- The **PositionComponent** will automatically manage BreakEven and Trailing Stop.
 
 ---
 
@@ -53,7 +53,7 @@ New-Item -ItemType SymbolicLink -Path "C:\Users\<your_username>\AppData\Roaming\
 
 ```plaintext
 quant-pie-mql5/
-├── core/            # Core modules (OrderManager, RiskManager, etc.)
+├── core/            # Core modules (OrderComponent, RiskComponent, etc.)
 ├── strategies/      # Specific strategies
 ├── examples/        # Sample EAs
 ├── scripts/         # Helper scripts

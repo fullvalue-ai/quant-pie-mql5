@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //| Project: Quant-Pie MQL5                                          |
-//| File:    LoggerManager.mqh                                       |
+//| File:    LoggerComponent.mqh                                       |
 //| Purpose: Manage logging functionalities as a Component          |
 //|                                                                  |
 //| (c) 2024 FullValue.AI - All rights reserved                      |
@@ -17,23 +17,19 @@ enum LogLevel
     LOG_ERROR
 };
 
-class LoggerManager : public IComponent
+class LoggerComponent : public IComponent
 {
 public:
     // Component Methods
-    void OnInit() override
-    {}
+    void OnInit() {}
 
-    void OnTick() override
-    {}
+    void OnTick() {}
 
-    void OnTrade() override
-    {}
+    void OnTrade() {}
 
-    void OnDeinit() override
-    {}
+    void OnDeinit() {}
 
-    // Main Logger Method
+    // Main LoggerComponent Method
     static void Log(string message, LogLevel level = LOG_INFO)
     {
         string prefix;
