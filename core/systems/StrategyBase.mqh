@@ -16,83 +16,87 @@
 
 class StrategyBase : public IComponent
 {
-protected:
-    // Storage for registered signal components
-    ISignalComponent* m_signals[MAX_SIGNAL_COMPONENTS];
-    int               m_signalCount;
+    protected:
+        ISignalComponent* m_signals[MAX_SIGNAL_COMPONENTS]; // Alterado para ponteiros
+        int              m_signalCount;
 
-public:
-    // Constructor: initialize storage
-    StrategyBase()
-    {
-        m_signalCount = 0;
-        ArrayInitialize(m_signals, NULL);
-    }
-
-    // Destructor: call OnDeinit and free each component
-    virtual ~StrategyBase()
-    {
-        for(int i = 0; i < m_signalCount; i++)
+    public:
+        // Construtor: inicializar armazenamento
+        StrategyBase()
         {
-            if(m_signals[i] != NULL)
+            m_signalCount = 0;
+            for (int i = 0; i < MAX_SIGNAL_COMPONENTS; i++)
+                m_signals[i] = NULL; // Inicializar ponteiros como NULL
+        }
+
+        // Registrar um componente de sinal
+        bool AddSignalComponent(ISignalComponent& component)
+        {
+            if (m_signalCount >= MAX_SIGNAL_COMPONENTS)
+                return false;
+            m_signals[m_signalCount++] = &component;
+            return true;
+        }
+
+        // Ciclo de vida principal: propagar para todos os sinais registrados
+        virtual void OnInit() override
+        {
+            for (int i = 0; i < m_signalCount; i++)
+                if (m_signals[i] != NULL)
+                    m_signals[i]->OnInit();
+        }
+
+        virtual void OnTick() override
+        {
+            for (int i = 0; i < m_signalCount; i++)
+                if (m_signals[i] != NULL)
+                    m_signals[i]->OnTick();
+        }
+
+        virtual void OnTrade() override
+        {
+            for (int i = 0; i < m_signalCount; i++)
+                if (m_signals[i] != NULL)
+                    m_signals[i]->OnTrade();
+        }
+
+        virtual void OnDeinit() override
+        {
+            for (int i = 0; i < m_signalCount; i++)
+                if (m_signals[i] != NULL)
+                    m_signals[i]->OnDeinit();
+        }
+
+    protected:
+        // Avaliar todos os sinais e retornar o primeiro diferente de NONE
+        SignalType EvaluateSignals()
+        {
+            for (int i = 0; i < m_signalCount; i++)
             {
-                m_signals[i]->OnDeinit();
-                delete m_signals[i];
+                if (m_signals[i] != NULL)
+                {
+                    SignalType sig = m_signals[i]->EvaluateSignal();
+                    if (sig != SIGNAL_NONE)
+                        return sig;
+                }
             }
+            return SIGNAL_NONE;
         }
-    }
 
-    // Register a signal component (takes ownership)
-    bool AddSignalComponent(ISignalComponent* component)
-    {
-        if(component == NULL || m_signalCount >= MAX_SIGNAL_COMPONENTS)
-            return false;
-        m_signals[m_signalCount++] = component;
-        return true;
-    }
-
-    // IComponent lifecycle: propagate to all children
-    void OnInit()
-    {
-        for(int i = 0; i < m_signalCount; i++)
-            m_signals[i]->OnInit();
-    }
-
-    void OnTick()
-    {
-        for(int i = 0; i < m_signalCount; i++)
-            m_signals[i]->OnTick();
-    }
-
-    void OnTrade()
-    {
-        for(int i = 0; i < m_signalCount; i++)
-            m_signals[i]->OnTrade();
-    }
-
-    void OnDeinit()
-    {
-        for(int i = 0; i < m_signalCount; i++)
-            m_signals[i]->OnDeinit();
-    }
-
-protected:
-    // Evaluate all registered signals and return the first non-NONE
-    SignalType EvaluateSignals()
-    {
-        for(int i = 0; i < m_signalCount; i++)
+    public:
+        // Implementação padrão para GetSignal
+        virtual SignalType GetSignal()
         {
-            SignalType sig = m_signals[i]->EvaluateSignal();
-            if(sig != SIGNAL_NONE)
-                return sig;
+            return EvaluateSignals();
         }
-        return SIGNAL_NONE;
-    }
 
-public:
-    // Default implementation returns the aggregated signal
-    virtual SignalType GetSignal()
-    {
-        return EvaluateSignals();
-    }
+        // Extended lifecycle stubs (override when needed)
+        virtual void OnBar()           {}
+        virtual void OnTimer()         {}
+        virtual void OnOrderPlaced(const ulong ticket)     {}
+        virtual void OnOrderFilled(const ulong ticket,
+                                const double price,
+                                const double volume) {}
+
 };
+

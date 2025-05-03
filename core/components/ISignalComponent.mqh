@@ -4,8 +4,8 @@
 //+------------------------------------------------------------------+
 #property strict
 
-#include <core/components/IComponent.mqh>
-#include <core/components/SignalTypes.mqh>
+#include <QuantPie/core/components/IComponent.mqh>
+#include <QuantPie/core/components/SignalTypes.mqh>
 
 // Interface for signal-generating components
 class ISignalComponent : public IComponent

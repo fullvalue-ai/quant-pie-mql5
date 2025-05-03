@@ -1,0 +1,58 @@
+//+------------------------------------------------------------------+
+//| File:    TimeframeType.mqh                                       |
+//| Purpose: Enum for custom timeframes                             |
+//+------------------------------------------------------------------+
+#property strict
+
+enum ENUM_TIMEFRAME {
+   TIMEFRAME_NULL, // Disabled
+   TIMEFRAME_0000, // 00:00
+   TIMEFRAME_0015, // 00:15
+   TIMEFRAME_0030, // 00:30
+   TIMEFRAME_0100, // 01:00
+   TIMEFRAME_0130, // 01:30
+   TIMEFRAME_0200, // 02:00
+   TIMEFRAME_0230, // 02:30
+   TIMEFRAME_0300, // 03:00
+   TIMEFRAME_0330, // 03:30
+   TIMEFRAME_0400, // 04:00
+   TIMEFRAME_0430, // 04:30
+   TIMEFRAME_0500, // 05:00
+   TIMEFRAME_0530, // 05:30
+   TIMEFRAME_0600, // 06:00
+   TIMEFRAME_0630, // 06:30
+   TIMEFRAME_0700, // 07:00
+   TIMEFRAME_0730, // 07:30
+   TIMEFRAME_0800, // 08:00
+   TIMEFRAME_0830, // 08:30
+   TIMEFRAME_0900, // 09:00
+   TIMEFRAME_0930, // 09:30
+   TIMEFRAME_1000, // 10:00
+   TIMEFRAME_1030, // 10:30
+   TIMEFRAME_1100, // 11:00
+   TIMEFRAME_1130, // 11:30
+   TIMEFRAME_1200, // 12:00
+   TIMEFRAME_1230, // 12:30
+   TIMEFRAME_1300, // 13:00
+   TIMEFRAME_1330, // 13:30
+   TIMEFRAME_1400, // 14:00
+   TIMEFRAME_1430, // 14:30
+   TIMEFRAME_1500, // 15:00
+   TIMEFRAME_1530, // 15:30
+   TIMEFRAME_1600, // 16:00
+   TIMEFRAME_1630, // 16:30
+   TIMEFRAME_1700, // 17:00
+   TIMEFRAME_1730, // 17:30
+   TIMEFRAME_1800, // 18:00
+   TIMEFRAME_1830, // 18:30
+   TIMEFRAME_1900, // 19:00
+   TIMEFRAME_1930, // 19:30
+   TIMEFRAME_2000, // 20:00
+   TIMEFRAME_2030, // 20:30
+   TIMEFRAME_2100, // 21:00
+   TIMEFRAME_2130, // 21:30
+   TIMEFRAME_2200, // 22:00
+   TIMEFRAME_2230, // 22:30
+   TIMEFRAME_2300, // 23:00
+   TIMEFRAME_2330  // 23:30
+};

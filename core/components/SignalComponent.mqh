@@ -9,64 +9,56 @@
 
 #include <QuantPie/core/components/ISignalComponent.mqh>
 #include <QuantPie/core/components/SignalTypes.mqh>
+#include <QuantPie/core/builders/DIContainer.mqh>
 
 class SignalComponent : public ISignalComponent
 {
 private:
-    int            m_fastPeriod;
-    int            m_slowPeriod;
-    ENUM_MA_METHOD m_maMethod;
-    string         m_symbol;
+    DIContainer &m_container; // Referência ao DIContainer
     ENUM_TIMEFRAMES m_timeframe;
 
 public:
-    // Constructor
-    SignalComponent(int fastPeriod = 10,
-                    int slowPeriod = 50,
-                    ENUM_MA_METHOD maMethod = MODE_SMA,
-                    string symbol = "",
-                    ENUM_TIMEFRAMES timeframe = PERIOD_CURRENT)
+    SignalComponent(DIContainer &container)
+        : m_container(container) // Injetar DIContainer
     {
-        m_fastPeriod = fastPeriod;
-        m_slowPeriod = slowPeriod;
-        m_maMethod    = maMethod;
-        m_symbol      = (symbol == "") ? _Symbol : symbol;
-        m_timeframe   = timeframe;
+        m_timeframe = (ENUM_TIMEFRAMES)container.GetDefaultTimeframe();
     }
 
-    // Destructor
-    ~SignalComponent() override { }
-
-    // Component lifecycle methods
-    void OnInit()   { /* optional initialization */ }
-    void OnTick()   { /* optional tick update */ }
-    void OnTrade()  { /* optional post-trade update */ }
-    void OnDeinit(){ /* optional cleanup */ }
-
-    // Evaluate and return the trading signal
-    SignalType EvaluateSignal() override
+    void OnInit() override
     {
-        int fastHandle = iMA(m_symbol, m_timeframe, m_fastPeriod, 0, m_maMethod, PRICE_CLOSE);
-        int slowHandle = iMA(m_symbol, m_timeframe, m_slowPeriod, 0, m_maMethod, PRICE_CLOSE);
+        Print("Signal component initialized with timeframe: ", EnumToString(m_timeframe));
+    }
 
-        double fastMA[], slowMA[];
+    void OnTick() {}
+
+    void OnTrade() {}
+
+    void OnDeinit() {}
+
+    // Avaliar e retornar o sinal de negociação
+    SignalType EvaluateSignal()
+    {
+        int fastHandle = iMA(m_container.GetSymbol(), m_timeframe, m_container.GetFastPeriod(), 0, m_container.GetMAMethod(), PRICE_CLOSE);
+        int slowHandle = iMA(m_container.GetSymbol(), m_timeframe, m_container.GetSlowPeriod(), 0, m_container.GetMAMethod(), PRICE_CLOSE);
+
+        double fastMA[2], slowMA[2];
         if (CopyBuffer(fastHandle, 0, 0, 2, fastMA) <= 0) return SIGNAL_NONE;
         if (CopyBuffer(slowHandle, 0, 0, 2, slowMA) <= 0) return SIGNAL_NONE;
 
-        // Bullish crossover
+        // Cruzamento de alta
         if (fastMA[1] < slowMA[1] && fastMA[0] > slowMA[0])
             return SIGNAL_BUY;
 
-        // Bearish crossover
+        // Cruzamento de baixa
         if (fastMA[1] > slowMA[1] && fastMA[0] < slowMA[0])
             return SIGNAL_SELL;
 
         return SIGNAL_NONE;
     }
 
-    // Optional: reset internal state after signal consumption
+    // Opcional: redefinir estado interno após consumo do sinal
     void Reset() override
     {
-        // e.g. clear last signal flag, counters, etc.
+        // Exemplo: limpar sinal anterior, contadores, etc.
     }
 };

@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //| Project: Quant-Pie MQL5                                          |
-//| File:    RiskComponent.mqh                                         |
+//| File:    RiskComponent.mqh                                       |
 //| Purpose: Full Risk Management (Limits + ATR + BreakEven + Trail) |
 //|                                                                  |
 //| (c) 2024 FullValue.AI - All rights reserved                      |
@@ -9,10 +9,13 @@
 
 #include <QuantPie/core/components/IComponent.mqh>
 #include <Trade/Trade.mqh>
+#include <QuantPie/core/DIContainer.mqh>
 
 class RiskComponent : public IComponent
 {
 private:
+    DIContainer &m_container; // Referência ao DIContainer
+
     // Core Limits
     double m_riskPerTrade;
     int    m_maxOpenPositions;
@@ -41,9 +44,10 @@ private:
     double m_trailingDistance;
 
 public:
-    RiskComponent(double riskPerTrade = 0.01, int maxOpenPositions = 5, 
+    RiskComponent(DIContainer &container, double riskPerTrade = 0.01, int maxOpenPositions = 5, 
                 double maxDailyLossPercent = 5.0, double maxWeeklyLossPercent = 10.0, double maxMonthlyLossPercent = 20.0,
                 int maxConsecutiveLosses = 3)
+        : m_container(container)
     {
         // Limits
         m_riskPerTrade = riskPerTrade;

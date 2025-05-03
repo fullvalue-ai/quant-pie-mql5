@@ -12,15 +12,14 @@
 class OrderComponent : public IComponent
 {
 private:
+    DIContainer &m_container; // Referência ao DIContainer
     int m_magicNumber;
     double m_slippage;
 
 public:
-    OrderComponent(int magicNumber = 0, double slippage = 5)
-    {
-        m_magicNumber = magicNumber;
-        m_slippage = slippage;
-    }
+    // Construtor
+    OrderComponent(DIContainer &container, int magicNumber = 0, double slippage = 5)
+        : m_container(container), m_magicNumber(magicNumber), m_slippage(slippage) {}
 
     // Component Methods
     void OnInit() {}
@@ -37,10 +36,8 @@ public:
         if (price <= 0.0)
             price = ask;
 
-        MqlTradeRequest request;
-        MqlTradeResult result;
-        ZeroMemory(request);
-        ZeroMemory(result);
+        MqlTradeRequest request = {0};
+        MqlTradeResult result = {0};
 
         request.action = TRADE_ACTION_DEAL;
         request.symbol = _Symbol;
@@ -68,10 +65,8 @@ public:
         if (price <= 0.0)
             price = bid;
 
-        MqlTradeRequest request;
-        MqlTradeResult result;
-        ZeroMemory(request);
-        ZeroMemory(result);
+        MqlTradeRequest request = {0};
+        MqlTradeResult result = {0};
 
         request.action = TRADE_ACTION_DEAL;
         request.symbol = _Symbol;
@@ -102,10 +97,8 @@ public:
         ENUM_POSITION_TYPE type = (ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE);
         double price = (type == POSITION_TYPE_BUY) ? SymbolInfoDouble(_Symbol, SYMBOL_BID) : SymbolInfoDouble(_Symbol, SYMBOL_ASK);
 
-        MqlTradeRequest request;
-        MqlTradeResult result;
-        ZeroMemory(request);
-        ZeroMemory(result);
+        MqlTradeRequest request = {0};
+        MqlTradeResult result = {0};
 
         request.action = TRADE_ACTION_DEAL;
         request.position = ticket;
@@ -131,10 +124,8 @@ public:
         if (ticket == 0)
             return false;
 
-        MqlTradeRequest request;
-        MqlTradeResult result;
-        ZeroMemory(request);
-        ZeroMemory(result);
+        MqlTradeRequest request = {0};
+        MqlTradeResult result = {0};
 
         request.action = TRADE_ACTION_SLTP;
         request.position = ticket;

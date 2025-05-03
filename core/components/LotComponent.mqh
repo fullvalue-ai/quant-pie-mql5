@@ -9,48 +9,37 @@
 
 #include <QuantPie/core/helpers/PositionSizeCalculatorHelper.mqh>
 #include <QuantPie/core/components/IComponent.mqh>
+#include <QuantPie/core/DIContainer.mqh>
 
 class LotComponent : public IComponent
 {
 private:
-    PositionSizeCalculatorHelper* m_calculator;
+    DIContainer &m_container; // Referência ao DIContainer
+    PositionSizeCalculatorHelper m_calculator;
 
 public:
-    // Constructor
-    LotComponent(double riskPercent = 0.01)
-    {
-        m_calculator = new PositionSizeCalculatorHelper(riskPercent);
-    }
+    // Construtor
+    LotComponent(DIContainer &container, double riskPercent = 0.01)
+        : m_container(container), m_calculator(riskPercent) {}
 
-    // Destructor
-    ~LotComponent()
-    {
-        if (m_calculator != NULL)
-            delete m_calculator;
-    }
-
-    // Component lifecycle
+    // Ciclo de vida do componente
     void OnInit() {}
 
     void OnTick() {}
 
     void OnTrade() {}
 
-    void OnDeinit() { }
+    void OnDeinit() {}
 
-    // Calculate lot size
+    // Calcular tamanho do lote
     double CalculateLot(double stopLossDistancePips = 50)
     {
-        if (m_calculator == NULL)
-            return 0.0;
-
         return m_calculator.CalculateLot(stopLossDistancePips);
     }
 
-    // Adjust risk if needed
+    // Ajustar risco, se necessário
     void SetRiskPercent(double riskPercent)
     {
-        if (m_calculator != NULL)
-            m_calculator.SetRiskPercent(riskPercent);
+        m_calculator.SetRiskPercent(riskPercent);
     }
 };

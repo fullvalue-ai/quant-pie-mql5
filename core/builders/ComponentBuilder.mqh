@@ -6,71 +6,71 @@
 //+------------------------------------------------------------------+
 #property strict
 
-#include <QuantPie/core/config/SignalConfig.mqh>
-#include <QuantPie/core/builders/EAConfig.mqh>
+#include <QuantPie/core/config/Config.mqh>
 #include <QuantPie/core/builders/DIContainer.mqh>
+#include <QuantPie/core/types/OrderType.mqh>
+#include <QuantPie/core/types/StopLossType.mqh>
+#include <QuantPie/core/systems/IStrategy.mqh>
+#include <QuantPie/core/builders/Workflow.mqh>
 
-// Fluent builder encapsulating EAConfig, SignalConfig and DIContainer
+// Fluent builder: configura DIContainer usando Config genérico
 class ComponentBuilder
 {
 private:
-    EAConfig     m_execConfig;
-    SignalConfig m_signalConfig;
-    DIContainer  m_container;
+    Workflow* m_workflow;
 
 public:
-    // Configure execution settings (risk, order, session)
-    ComponentBuilder& ConfigureExecution(const EAConfig &cfg)
+    // Construtor
+    ComponentBuilder(DIContainer &container)
     {
-        m_execConfig = cfg;
+        m_workflow = new Workflow(container);
+    }
+
+    ComponentBuilder& AddLogger()
+    {
+        m_workflow->OnInit();
         return *this;
     }
 
-    // Configure signal settings (moving average, RSI, etc.)
-    ComponentBuilder& ConfigureSignal(const SignalConfig &sigCfg)
+    ComponentBuilder& AddOrder()
     {
-        m_signalConfig = sigCfg;
+        m_workflow->OnInit();
         return *this;
     }
 
-    // Add core execution components: logger, risk, lot, order, session
-    ComponentBuilder& AddCoreComponents()
+    ComponentBuilder& AddRisk()
     {
-        m_container
-            .AddLogger()
-            .AddRisk(m_execConfig.riskPercent)
-            .AddLot(m_execConfig.riskPercent)
-            .AddOrder(m_execConfig.magicNumber)
-            .AddSession(m_execConfig.sessStartH, m_execConfig.sessStartM,
-                        m_execConfig.sessEndH,   m_execConfig.sessEndM);
-        if(m_execConfig.useBreakEven)
-            m_container.AddComponent(new BreakEvenComponent(m_execConfig.breakEvenPips));
-        if(m_execConfig.useTrailingStop)
-            m_container.AddComponent(new TrailingStopComponent(m_execConfig.trailingStopPips));
+        m_workflow->OnInit();
         return *this;
     }
 
-    // Add signal component based on configured signal settings
-    ComponentBuilder& AddSignalComponent()
+    ComponentBuilder& AddSession()
     {
-        m_container.AddSignal(
-            (int)m_signalConfig.Get("fastMA", 10),
-            (int)m_signalConfig.Get("slowMA", 50),
-            (ENUM_MA_METHOD)(int)m_signalConfig.Get("maMethod", MODE_SMA)
-        );
+        m_workflow->OnInit();
         return *this;
     }
 
-    // Register user strategy
-    ComponentBuilder& AddStrategy(StrategyBase *strategy)
+    ComponentBuilder& AddSignal()
     {
-        m_container.AddStrategy(strategy);
+        m_workflow->OnInit();
         return *this;
     }
 
-    // Finalize and retrieve the configured container
-    DIContainer& Build()
+    ComponentBuilder& AddLot()
     {
-        return m_container;
+        m_workflow->OnInit();
+        return *this;
+    }
+
+    ComponentBuilder& AddPosition()
+    {
+        m_workflow->OnInit();
+        return *this;
+    }
+
+    // Retornar o workflow configurado
+    Workflow* Build()
+    {
+        return m_workflow;
     }
 };

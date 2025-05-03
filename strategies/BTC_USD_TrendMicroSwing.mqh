@@ -8,7 +8,7 @@
 #include <QuantPie/core/systems/StrategyBase.mqh>
 #include <QuantPie/core/components/SignalTypes.mqh>
 #include <QuantPie/core/components/SignalComponent.mqh>
-#include <QuantPie/core/config/SignalConfig.mqh>
+#include <QuantPie/core/config/Config.mqh>
 
 class BTC_USD_TrendMicroSwing : public StrategyBase
 {
@@ -20,8 +20,8 @@ private:
     double           m_atrThreshold;
 
 public:
-    // ctor takes only SignalConfig
-    BTC_USD_TrendMicroSwing(const SignalConfig &cfg)
+    // Construtor aceita apenas Config
+    BTC_USD_TrendMicroSwing(const Config &cfg)
     {
         m_fastMA      = (int)cfg.Get("fastMA", 9);
         m_slowMA      = (int)cfg.Get("slowMA", 21);
@@ -29,27 +29,26 @@ public:
         m_timeframe   = (ENUM_TIMEFRAMES)(int)cfg.Get("timeframe", PERIOD_H1);
         m_atrThreshold= cfg.Get("atrMin", 100.0);
 
-        // register the crossover MA signal as a child component
-        AddSignalComponent(
-            new SignalComponent(
-                m_fastMA,
-                m_slowMA,
-                m_maMethod,
-                /* symbol */ "",
-                m_timeframe
-            )
+        // Registrar o sinal de cruzamento de médias móveis como componente filho
+        SignalComponent signal(
+            m_fastMA,
+            m_slowMA,
+            m_maMethod,
+            /* symbol */ "",
+            m_timeframe
         );
+        AddSignalComponent(signal);
     }
 
-    // Only need to override GetSignal: ATR filter + MA crossover
+    // Sobrescrever GetSignal: filtro ATR + cruzamento de médias móveis
     virtual SignalType GetSignal() override
     {
-        // 1) ATR filter
+        // 1) Filtro ATR
         double atr = iATR(NULL, m_timeframe, m_fastMA);
         if(atr < m_atrThreshold)
             return SIGNAL_NONE;
 
-        // 2) delegate to StrategyBase: runs all child SignalComponent(s)
+        // 2) Delegar para StrategyBase: executa todos os SignalComponent(s) filhos
         return StrategyBase::GetSignal();
     }
 };

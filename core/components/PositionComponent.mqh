@@ -12,6 +12,7 @@
 class PositionComponent : public IComponent
 {
 private:
+    DIContainer &m_container; // Referência ao DIContainer
     double m_breakEvenPips;
     bool   m_enableBreakEven;
 
@@ -22,9 +23,10 @@ private:
     bool   m_enableStepStop;
 
 public:
-    PositionComponent(double breakEvenPips = 0, bool enableBreakEven = false,
+    PositionComponent(DIContainer &container, double breakEvenPips = 0, bool enableBreakEven = false,
                     double trailingStopPips = 0, bool enableTrailingStop = false,
                     double stepPips = 0, bool enableStepStop = false)
+        : m_container(container) // Injetar DIContainer
     {
         m_breakEvenPips = breakEvenPips;
         m_enableBreakEven = enableBreakEven;

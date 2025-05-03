@@ -1,0 +1,41 @@
+{
+  "folders": [
+    {
+      "path": ".."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true,
+      "**/.svn": true,
+      "**/.hg": true,
+      "**/CVS": true,
+      "**/.DS_Store": true
+    },
+    "files.associations": {
+      "*.mqh": "cpp",
+      "*.mq5": "cpp"
+    },
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true,
+    "files.autoSave": "onWindowChange",
+    "[cpp]": {
+      "editor.tabSize": 4,
+      "editor.insertSpaces": true
+    },
+    "[mql5]": {
+      "editor.tabSize": 4,
+      "editor.insertSpaces": true
+    },
+    "[mql4]": {
+      "editor.tabSize": 4,
+      "editor.insertSpaces": true
+    },
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000
+  },
+  "extensions": {
+    "recommendations": ["ms-vscode.cpptools", "esbenp.prettier-vscode"]
+  }
+}

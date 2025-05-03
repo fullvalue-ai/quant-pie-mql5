@@ -2,3 +2,6 @@
 *.ex5
 *.ex4
 sync_config.env
+repo-tree.txt
+open_quantpie_ygorgpt.bat
+.temp

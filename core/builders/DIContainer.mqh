@@ -1,3 +1,6 @@
+#ifndef DI_CONTAINER_MQH
+#define DI_CONTAINER_MQH
+
 //+------------------------------------------------------------------+
 //| File:    DIContainer.mqh                                         |
 //| Purpose: Manages lifecycle of components and strategy            |
@@ -13,97 +16,200 @@
 #include <QuantPie/core/components/OrderComponent.mqh>
 #include <QuantPie/core/components/SessionComponent.mqh>
 #include <QuantPie/core/components/SignalComponent.mqh>
+#include <QuantPie/core/components/PositionComponent.mqh>
 #include <QuantPie/core/systems/StrategyBase.mqh>
+#include <QuantPie/core/types/OrderType.mqh>
+#include <QuantPie/core/types/StopLossType.mqh>
+#include <QuantPie/core/types/TimeframeType.mqh>
 
 #define MAX_DI_COMPONENTS 32
 
 class DIContainer : public IComponent
 {
 private:
-    IComponent* m_components[MAX_DI_COMPONENTS];
+    IComponent* m_components[MAX_DI_COMPONENTS]; // Alterado para ponteiros
     int         m_count;
 
+    LoggerComponent* m_logger;
+    OrderComponent* m_order;
+    RiskComponent* m_risk;
+    SessionComponent* m_session;
+    SignalComponent* m_signal;
+    LotComponent* m_lot;
+    PositionComponent* m_position;
+
 public:
-    // Constructor
+    // Construtor
     DIContainer()
     {
         m_count = 0;
-        ArrayInitialize(m_components, NULL);
+        for (int i = 0; i < MAX_DI_COMPONENTS; i++)
+            m_components[i] = NULL; // Inicializar ponteiros como NULL
+
+        m_logger = NULL;
+        m_order = NULL;
+        m_risk = NULL;
+        m_session = NULL;
+        m_signal = NULL;
+        m_lot = NULL;
+        m_position = NULL;
     }
 
-    // Destructor
-    ~DIContainer() {}
-
-    // Add any IComponent-derived instance
-    DIContainer& AddComponent(IComponent* comp)
+    // Adicionar qualquer instância derivada de IComponent
+    void AddComponent(IComponent& comp)
     {
-        if(comp != NULL && m_count < MAX_DI_COMPONENTS)
-            m_components[m_count++] = comp;
-        return *this;
+        if (m_count < MAX_DI_COMPONENTS)
+        {
+            m_components[m_count++] = &comp;
+        }
     }
 
-    // Fluent helpers for core components
-    DIContainer& AddLogger()
+    // Métodos auxiliares para componentes principais
+    void AddLogger()
     {
-        return AddComponent(new LoggerComponent());
+        LoggerComponent* logger = new LoggerComponent();
+        AddComponent(*logger);
     }
 
-    DIContainer& AddRisk(double riskPercent)
+    void AddRisk(double riskPercent)
     {
-        return AddComponent(new RiskComponent(riskPercent));
+        RiskComponent* risk = new RiskComponent(riskPercent);
+        AddComponent(*risk);
     }
 
-    DIContainer& AddLot(double riskPercent)
+    void AddLot(double riskPercent)
     {
-        return AddComponent(new LotComponent(riskPercent));
+        LotComponent* lot = new LotComponent(riskPercent);
+        AddComponent(*lot);
     }
 
-    DIContainer& AddOrder(int magicNumber)
+    void AddOrder(int magicNumber)
     {
-        return AddComponent(new OrderComponent(magicNumber));
+        OrderComponent* order = new OrderComponent(magicNumber);
+        AddComponent(*order);
     }
 
-    DIContainer& AddSession(int startHour, int startMin, int endHour, int endMin)
+    void AddSession(int startHour, int startMin, int endHour, int endMin)
     {
-        return AddComponent(new SessionComponent(startHour, startMin, endHour, endMin));
+        SessionComponent* session = new SessionComponent(startHour, startMin, endHour, endMin);
+        AddComponent(*session);
     }
 
-    DIContainer& AddSignal(int fastPeriod, int slowPeriod, ENUM_MA_METHOD maMethod)
+    void AddSignal(int fastPeriod, int slowPeriod, ENUM_MA_METHOD maMethod)
     {
-        return AddComponent(new SignalComponent(fastPeriod, slowPeriod, maMethod));
+        SignalComponent* signal = new SignalComponent(fastPeriod, slowPeriod, maMethod);
+        AddComponent(*signal);
     }
 
-    // Register your trading strategy (must derive from StrategyBase)
-    DIContainer& AddStrategy(StrategyBase* strat)
+    void AddStrategy(StrategyBase& strat)
     {
-        return AddComponent(strat);
+        AddComponent(strat);
     }
 
-    // IComponent lifecycle: propagate to all components
+    // Métodos de ciclo de vida
     void OnInit()
     {
-        for(int i = 0; i < m_count; i++)
-            m_components[i]->OnInit();
+        for (int i = 0; i < m_count; i++)
+        {
+            if (m_components[i] != NULL)
+                m_components[i]->OnInit();
+        }
     }
 
     void OnTick()
     {
-        for(int i = 0; i < m_count; i++)
-            m_components[i]->OnTick();
+        for (int i = 0; i < m_count; i++)
+        {
+            if (m_components[i] != NULL)
+                m_components[i]->OnTick();
+        }
     }
 
     void OnTrade()
     {
-        for(int i = 0; i < m_count; i++)
-            m_components[i]->OnTrade();
+        for (int i = 0; i < m_count; i++)
+        {
+            if (m_components[i] != NULL)
+                m_components[i]->OnTrade();
+        }
     }
 
     void OnDeinit()
     {
-        for(int i = 0; i < m_count; i++)
+        for (int i = 0; i < m_count; i++)
         {
-            m_components[i]->OnDeinit();
-            delete m_components[i];
+            if (m_components[i] != NULL)
+            {
+                m_components[i]->OnDeinit();
+                delete m_components[i]; // Liberar memória
+            }
         }
     }
+
+    LoggerComponent& GetLogger()
+    {
+        if (m_logger == NULL)
+            m_logger = new LoggerComponent(*this);
+        return *m_logger;
+    }
+
+    OrderComponent& GetOrder()
+    {
+        if (m_order == NULL)
+            m_order = new OrderComponent(*this);
+        return *m_order;
+    }
+
+    RiskComponent& GetRisk()
+    {
+        if (m_risk == NULL)
+            m_risk = new RiskComponent(*this);
+        return *m_risk;
+    }
+
+    SessionComponent& GetSession()
+    {
+        if (m_session == NULL)
+            m_session = new SessionComponent(*this);
+        return *m_session;
+    }
+
+    SignalComponent& GetSignal()
+    {
+        if (m_signal == NULL)
+            m_signal = new SignalComponent(*this);
+        return *m_signal;
+    }
+
+    LotComponent& GetLot()
+    {
+        if (m_lot == NULL)
+            m_lot = new LotComponent(*this);
+        return *m_lot;
+    }
+
+    PositionComponent& GetPosition()
+    {
+        if (m_position == NULL)
+            m_position = new PositionComponent(*this);
+        return *m_position;
+    }
+
+    ~DIContainer()
+    {
+        delete m_logger;
+        delete m_order;
+        delete m_risk;
+        delete m_session;
+        delete m_signal;
+        delete m_lot;
+        delete m_position;
+    }
+
+    // Example: Provide access to enums or shared types
+    ENUM_ORDER_TYPE GetOrderType() const { return ORDER_MARKET; } // Placeholder
+    ENUM_STOP_LOSS_TYPE GetStopLossType() const { return STOP_LOSS_POINTS; } // Placeholder
+    ENUM_TIMEFRAME GetDefaultTimeframe() const { return TIMEFRAME_0900; } // Placeholder
 };
+
+#endif // DI_CONTAINER_MQH

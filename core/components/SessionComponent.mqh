@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //| Project: Quant-Pie MQL5                                          |
-//| File:    SessionComponent.mqh                                      |
+//| File:    SessionComponent.mqh                                    |
 //| Purpose: Manage allowed trading sessions as a Component         |
 //|                                                                  |
 //| (c) 2024 FullValue.AI - All rights reserved                      |
@@ -8,26 +8,29 @@
 #property strict
 
 #include <QuantPie/core/components/IComponent.mqh>
+#include <QuantPie/core/types/TimeframeType.mqh>
+#include <QuantPie/core/builders/DIContainer.mqh>
 
 class SessionComponent : public IComponent
 {
 private:
-    int m_startHour;
-    int m_startMinute;
-    int m_endHour;
-    int m_endMinute;
+    DIContainer &m_container; // Referência ao DIContainer
+    ENUM_TIMEFRAME m_startTime;
+    ENUM_TIMEFRAME m_endTime;
 
 public:
-    SessionComponent(int startHour = 0, int startMinute = 0, int endHour = 23, int endMinute = 59)
+    SessionComponent(DIContainer &container)
+        : m_container(container) // Injetar DIContainer
     {
-        m_startHour = startHour;
-        m_startMinute = startMinute;
-        m_endHour = endHour;
-        m_endMinute = endMinute;
+        m_startTime = container.GetDefaultTimeframe();
+        m_endTime = container.GetDefaultTimeframe();
     }
 
-    // Component Methods
-    void OnInit() {}
+    void OnInit() override
+    {
+        Print("Session starts at: ", EnumToString(m_startTime));
+        Print("Session ends at: ", EnumToString(m_endTime));
+    }
 
     void OnTick() {}
 
@@ -41,8 +44,8 @@ public:
         TimeToStruct(TimeCurrent(), timeStruct);
 
         int currentMinutes = timeStruct.hour * 60 + timeStruct.min;
-        int startMinutes = m_startHour * 60 + m_startMinute;
-        int endMinutes = m_endHour * 60 + m_endMinute;
+        int startMinutes = TimeframeToMinutes(m_startTime);
+        int endMinutes = TimeframeToMinutes(m_endTime);
 
         return (currentMinutes >= startMinutes && currentMinutes <= endMinutes);
     }

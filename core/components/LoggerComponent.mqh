@@ -19,8 +19,15 @@ enum LogLevel
 
 class LoggerComponent : public IComponent
 {
+private:
+    DIContainer &m_container; // Referência ao DIContainer
+
 public:
-    // Component Methods
+    // Construtor
+    LoggerComponent(DIContainer &container)
+        : m_container(container) {}
+
+    // Métodos do componente
     void OnInit() {}
 
     void OnTick() {}
@@ -29,8 +36,8 @@ public:
 
     void OnDeinit() {}
 
-    // Main LoggerComponent Method
-    static void Log(string message, LogLevel level = LOG_INFO)
+    // Método principal do LoggerComponent
+    static void Log(const string &message, LogLevel level = LOG_INFO)
     {
         string prefix;
         switch (level)
